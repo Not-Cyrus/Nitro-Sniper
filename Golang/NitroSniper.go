@@ -33,8 +33,17 @@ func Message(s *discordgo.Session, Message *discordgo.MessageCreate) {
 		if len(regex) > 0 {
 			if Claim(regex[0]) == 200 {
 				fmt.Println("claimed: https://discord.gift/" + regex[0])
-			} else {
-				fmt.Println("failed on https://discord.gift/" + regex[0])
+			}
+		}
+	}
+}
+
+func Edit(s *discordgo.Session, Message *discordgo.MessageUpdate) {
+	if !Message.Author.Bot {
+		regex := regexp.MustCompile("[A-Za-z0-9]{24}|[A-Za-z0-9]{16}").FindStringSubmatch(Message.Content)
+		if len(regex) > 0 {
+			if Claim(regex[0]) == 200 {
+				fmt.Println("claimed: https://discord.gift/" + regex[0])
 			}
 		}
 	}
@@ -45,6 +54,7 @@ func main() {
 	fmt.Scan(&Token)
 	dg, _ := discordgo.New(Token)
 	dg.AddHandler(Message)
+	dg.AddHandler(Edit)
 	dg.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsDirectMessages | discordgo.IntentsGuildMessages)
 	dg.Open()
 	sc := make(chan os.Signal, 1)
