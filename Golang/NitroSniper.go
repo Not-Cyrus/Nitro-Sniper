@@ -28,7 +28,7 @@ func Claim(Code string) int {
 }
 
 func Message(s *discordgo.Session, Message *discordgo.MessageCreate) {
-	if !Message.Author.Bot { // would use a return but I for some reason like this better
+	if Message.Author != nil && !Message.Author.Bot { // would use a return but I for some reason like this better
 		regex := regexp.MustCompile("[A-Za-z0-9]{24}|[A-Za-z0-9]{16}").FindStringSubmatch(Message.Content)
 		if len(regex) > 0 {
 			if Claim(regex[0]) == 200 {
@@ -39,7 +39,7 @@ func Message(s *discordgo.Session, Message *discordgo.MessageCreate) {
 }
 
 func Edit(s *discordgo.Session, Message *discordgo.MessageUpdate) {
-	if !Message.Author.Bot {
+	if Message.Author != nil && !Message.Author.Bot {
 		regex := regexp.MustCompile("[A-Za-z0-9]{24}|[A-Za-z0-9]{16}").FindStringSubmatch(Message.Content)
 		if len(regex) > 0 {
 			if Claim(regex[0]) == 200 {
@@ -55,7 +55,6 @@ func main() {
 	dg, _ := discordgo.New(Token)
 	dg.AddHandler(Message)
 	dg.AddHandler(Edit)
-	dg.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsDirectMessages | discordgo.IntentsGuildMessages)
 	dg.Open()
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
